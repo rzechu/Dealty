@@ -1,0 +1,29 @@
+﻿@inject IDataService dataService
+@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, wod!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+
+
+@foreach(var item in Data)
+{
+    <span>@item</span><br/>
+}
+
+@code {
+    private List<string> Data { get; set; } = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var initialized = base.OnInitializedAsync();
+        var result = await dataService.GetData();
+
+        Data = result;
+    }
+}
