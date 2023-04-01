@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Dealty.WebApi.Data;
 using Dealty.WebApi.Interfaces;
+using NLog;
 
 namespace Dealty.WebApi.Controllers
 {
@@ -14,13 +15,17 @@ namespace Dealty.WebApi.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
+        //private static IDealtyLogger logger = LogManager.GetLogger(nameof(CategoriesController));
+        private readonly Logger.IDealtyLogger _logger;
         //private readonly DealtyDBContext _context;
+
         private readonly ICategoryRepositoryAsync _categoryRepositoryAsync;
 
-        public CategoriesController(ICategoryRepositoryAsync categoryRepositoryAsync)
+        public CategoriesController(ICategoryRepositoryAsync categoryRepositoryAsync, Logger.IDealtyLogger logger)
         {
             //_context = context;
             _categoryRepositoryAsync = categoryRepositoryAsync;
+            _logger = logger;
         }
 
         // GET: api/Categories
@@ -30,6 +35,7 @@ namespace Dealty.WebApi.Controllers
             var dbRecord = await _categoryRepositoryAsync.GetAllAsync();
             if (dbRecord == null)
             {
+                _logger.Warn("not found");
                 return NotFound();
             }
             return Ok(dbRecord);
@@ -42,6 +48,7 @@ namespace Dealty.WebApi.Controllers
             var dbRecord = await _categoryRepositoryAsync.GetByIdAsync(id);
             if (dbRecord == null)
             {
+                _logger.Warn($"not found {id}");
                 return NotFound();
             }
             return Ok(dbRecord);

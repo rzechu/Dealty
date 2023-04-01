@@ -3,8 +3,20 @@ using Microsoft.EntityFrameworkCore;
 using Dealty.WebApi.Controllers;
 using Dealty.WebApi.Interfaces;
 using Microsoft.Extensions.Options;
+using Dealty.WebApi.Logger;
+using NLog.Web;
+using NLog;
+
+
+IDealtyLogger logger = new DealtyLogger();
+logger.Debug("init main");
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+builder.Host.UseNLog();
+
 
 // Add services to the container.
 
@@ -23,6 +35,7 @@ builder.Services.AddDbContext<DealtyDBContext>(
         });
 
 
+builder.Services.AddSingleton<IDealtyLogger, DealtyLogger>();
 builder.Services.AddScoped<ICategoryRepositoryAsync, CategoryRepository>();
 
 var app = builder.Build();
