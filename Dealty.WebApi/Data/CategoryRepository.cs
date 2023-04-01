@@ -1,11 +1,11 @@
-﻿using Dealty.Shared.Data;
-using Dealty.Shared.Interfaces;
+﻿using Dealty.WebApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dealty.WebApi.Data
 {
     public class CategoryRepository : ICategoryRepository, ICategoryRepositoryAsync
     {
+
         private readonly DealtyDBContext _dbContext;
 
         public CategoryRepository(DealtyDBContext dbContext)

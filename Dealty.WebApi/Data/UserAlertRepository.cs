@@ -1,5 +1,4 @@
-﻿using Dealty.Shared.Data;
-using Dealty.Shared.Interfaces;
+﻿using Dealty.WebApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dealty.WebApi.Data

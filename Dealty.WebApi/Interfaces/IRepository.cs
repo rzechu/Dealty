@@ -1,4 +1,4 @@
-﻿namespace Dealty.Shared.Interfaces
+﻿namespace Dealty.WebApi.Interfaces
 {
     public interface IRepository<T> where T : class
     {

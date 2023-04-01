@@ -1,4 +1,4 @@
-﻿namespace Dealty.Shared.Data
+﻿namespace Dealty.WebApi.Data
 {
     public class UserAlert
     {

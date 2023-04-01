@@ -1,6 +1,6 @@
-﻿using Dealty.Shared.Data;
+﻿using Dealty.WebApi.Data;
 
-namespace Dealty.Shared.Interfaces
+namespace Dealty.WebApi.Interfaces
 {
     public interface IUserRepository : IRepository<User>
     {
