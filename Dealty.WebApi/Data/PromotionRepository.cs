@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dealty.WebApi.Data
 {
-    public class PromotionRepository : IPromotionRepository
+    public class PromotionRepository : IPromotionRepository, IPromotionRepositoryAsync
     {
         private readonly DealtyDBContext _dbContext;
 
@@ -90,6 +90,19 @@ namespace Dealty.WebApi.Data
                 return (false, $"An error occured. Error Message: {ex.Message}");
             }
         }
+
+        public async Task<IEnumerable<Promotion>> GetAllPaginatedAsync(int fetch, int offset)
+        {
+            try
+            {
+                return await _dbContext.Promotions.Skip(offset).Take(fetch).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         #endregion
+
     }
 }

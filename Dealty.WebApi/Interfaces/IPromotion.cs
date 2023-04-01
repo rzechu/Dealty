@@ -6,7 +6,7 @@ namespace Dealty.WebApi.Interfaces
     {
     }
 
-    public interface IPromotionRepositoryAsync : IRepositoryAsync<Promotion>
+    public interface IPromotionRepositoryAsync : IRepositoryAsync<Promotion>, IPagination<Promotion>
     {
     }
 }

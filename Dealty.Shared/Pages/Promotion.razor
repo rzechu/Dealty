@@ -1,0 +1,106 @@
+﻿@page "/promotion"
+@using Dealty.Shared
+@inject HttpClient http
+@inject IJSRuntime jsRuntime
+
+@using System.Net.Http.Json
+@using Microsoft.JSInterop;
+
+<h1>Promocje</h1>
+
+<div class="promocje" @onscroll="OnScroll">
+    @foreach (var promotion in promotions)
+    {
+        <div class="promocja">
+            <h3>@promotion.Title</h3>
+            <p>@promotion.Description</p>
+            <p>@promotion.InsertDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+        </div>
+    }
+
+    @if (loading)
+    {
+        <p>Loading...</p>
+    }
+</div>
+
+@if (error)
+{
+    <p class="error">@errorMessage</p>
+}
+
+<style>
+
+    div.promocje {
+        margin: 4px, 4px;
+        padding: 4px;
+        width: 500px;
+        height: 110px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        text-align: justify;
+    }
+</style>
+
+@code {
+    List<Data.Promotion> promotions = new List<Data.Promotion>();
+    int page = 1;
+    bool loading = false;
+    bool error = false;
+    string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await jsRuntime.InvokeAsync<string>("console.log", "initizalied");
+
+
+        await LoadData();
+    }
+
+    private bool endOfData = false;
+
+    private async Task LoadData()
+    {
+        try
+        {
+            Console.WriteLine("lading data");
+            await jsRuntime.InvokeAsync<string>("console.log", $"load data page={page}");
+
+
+            //if(!endOfData)
+            loading = true;
+            var result = await http.GetFromJsonAsync<List<Data.Promotion>>($"api/Promotions/page?page={page}");
+            //if (result.Count() == 0)
+            //{
+            //    endOfData = true;
+            //}
+
+            promotions.AddRange(result);
+            page++;
+        }
+        catch (Exception ex)
+        {
+            error = true;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task OnScroll(/*UIEventArgs args*/)
+    {
+        Console.WriteLine("scroll");
+        await jsRuntime.InvokeAsync<string>("console.log", "onscroll");
+
+        //var scrollHeight = (int)args.GetPropertyValue<Decimal>("target.scrollHeight");
+        //var scrollTop = (int)args.GetPropertyValue<Decimal>("target.scrollTop");
+        //var clientHeight = (int)args.GetPropertyValue<Decimal>("target.clientHeight");
+
+        //if (scrollHeight - scrollTop == clientHeight)
+        {
+            await LoadData();
+        }
+    }
+}

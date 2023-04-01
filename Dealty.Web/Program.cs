@@ -5,6 +5,15 @@ using Microsoft.AspNetCore.Components.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+string BASE_ADRESS = builder.Configuration.GetSection("webapiUrl")?.Value ?? throw new ArgumentNullException("webapiUrl");
+builder.Services.AddScoped(sp =>
+{
+    var client = new HttpClient();
+    client.BaseAddress = new Uri(BASE_ADRESS);
+    return client;
+});
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
