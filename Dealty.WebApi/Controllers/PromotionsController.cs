@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Dealty.WebApi.Data;
 using Dealty.WebApi.Interfaces;
 using NLog;
+using NLog.Filters;
+using Dealty.Shared.Filters;
+using Dealty.Shared.Data;
 
 namespace Dealty.WebApi.Controllers
 {
@@ -28,23 +31,38 @@ namespace Dealty.WebApi.Controllers
         }
 
         // GET: api/Promotions/page/5
+        //[HttpGet("page")]
+        //public async Task<ActionResult<Promotion>> Page(int pageNumber, int pageSize)
+        //{
+        //    var filter = new PaginationFilter(pageNumber, pageSize);
+        //    var dbRecord = await _promotionRepositoryAsync.GetAllPaginatedAsync(filter.PageSize, filter.Offset);
+        //    if (dbRecord == null)
+        //    {
+        //        _logger.Warn($"not found {pageNumber}");
+        //        return NotFound();
+        //    }
+        //    return Ok(dbRecord);
+        //}
+
         [HttpGet("page")]
-        public async Task<ActionResult<Promotion>> Page(int page)
+        public async Task<ActionResult<ResponsePage<WebApi.Data.Promotion>>> Page(int pageNumber, int pageSize)
         {
-            int size = 3;
-            var dbRecord = await _promotionRepositoryAsync.GetAllPaginatedAsync(size, page == 1 ? 0 : size*(page - 1) );
-            if (dbRecord == null)
+            var paginationFilter = new PaginationFilter(pageNumber, pageSize);
+            (IEnumerable<WebApi.Data.Promotion> dbRecords, int totalCount) result = await _promotionRepositoryAsync.GetAllPaginatedAsync(paginationFilter);
+            var pagedList = new ResponsePage<WebApi.Data.Promotion>(result.dbRecords, paginationFilter, result.totalCount);
+
+            if (result.dbRecords == null)
             {
-                _logger.Warn($"not found {page}");
+                _logger.Warn($"not found {pageNumber}");
                 return NotFound();
             }
-            return Ok(dbRecord);
+            return Ok(pagedList);
         }
 
 
         // GET: api/Promotions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Promotion>>> GetPromotions()
+        public async Task<ActionResult<IEnumerable<WebApi.Data.Promotion>>> GetPromotions()
         {
             var dbRecord = await _promotionRepositoryAsync.GetAllAsync();
             if (dbRecord == null)
@@ -57,7 +75,7 @@ namespace Dealty.WebApi.Controllers
 
         // GET: api/Promotions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Promotion>> GetPromotion(int id)
+        public async Task<ActionResult<WebApi.Data.Promotion>> GetPromotion(int id)
         {
             var dbRecord = await _promotionRepositoryAsync.GetByIdAsync(id);
             if (dbRecord == null)
@@ -71,7 +89,7 @@ namespace Dealty.WebApi.Controllers
         // PUT: api/Promotions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPromotion(int id, Promotion promotion)
+        public async Task<IActionResult> PutPromotion(int id, WebApi.Data.Promotion promotion)
         {
             if (id != promotion.PromotionID)
             {
@@ -91,7 +109,7 @@ namespace Dealty.WebApi.Controllers
         // POST: api/Promotions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Promotion>> PostPromotion(Promotion promotion)
+        public async Task<ActionResult<WebApi.Data.Promotion>> PostPromotion(WebApi.Data.Promotion promotion)
         {
             var dbRecord = await _promotionRepositoryAsync.AddAsync(promotion);
             

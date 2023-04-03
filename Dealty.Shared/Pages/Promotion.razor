@@ -1,6 +1,7 @@
 ﻿@page "/promotion"
 @using Dealty.Shared
-@inject HttpClient http
+@*@inject HttpClient http*@
+@inject IHttpClientFactory ClientFactory
 @inject IJSRuntime jsRuntime
 
 @using System.Net.Http.Json
@@ -43,57 +44,81 @@
 </style>
 
 @code {
+    bool isAfterRender = false;
+    const int PAGE_SIZE = 3;
+
     List<Data.Promotion> promotions = new List<Data.Promotion>();
-    int page = 1;
-    bool loading = false;
-    bool error = false;
-    string errorMessage = "";
+    private int page = 1;
+    private bool loading = false;
+    private bool endOfData = false;
+
+    private bool error = false;
+    private string errorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
-        await jsRuntime.InvokeAsync<string>("console.log", "initizalied");
-
-
+        if (isAfterRender)
+        {
+            await jsRuntime.InvokeAsync<string>("console.log", "initizalied");
+        }
         await LoadData();
     }
 
-    private bool endOfData = false;
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        isAfterRender = true;
+
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
 
     private async Task LoadData()
     {
         try
         {
-            Console.WriteLine("lading data");
-            await jsRuntime.InvokeAsync<string>("console.log", $"load data page={page}");
+            if (loading || endOfData)
+                return;
 
+            if (isAfterRender)
+            {
+                Console.WriteLine("loading data");
+                await jsRuntime.InvokeAsync<string>("console.log", $"load data page={page}");
+            }
 
-            //if(!endOfData)
+            var http = ClientFactory.CreateClient("DealtyHttpClient");
             loading = true;
-            var result = await http.GetFromJsonAsync<List<Data.Promotion>>($"api/Promotions/page?page={page}");
-            //if (result.Count() == 0)
-            //{
-            //    endOfData = true;
-            //}
+            var result = await http.GetFromJsonAsync<Data.ResponsePage<Data.Promotion>>($"api/Promotions/page?pageNumber={page}&pageSize={PAGE_SIZE}");
 
-            promotions.AddRange(result);
+            if(!result.HasNext || (!result.Data?.Any() ?? false))
+            {
+                endOfData = true;
+            }
+
+            promotions.AddRange(result.Data);
             page++;
+
+            loading = false;
         }
         catch (Exception ex)
         {
             error = true;
             errorMessage = ex.Message;
+
+            loading = false;
         }
         finally
         {
-            loading = false;
+            //loading = false;
         }
     }
 
     private async Task OnScroll(/*UIEventArgs args*/)
     {
-        Console.WriteLine("scroll");
-        await jsRuntime.InvokeAsync<string>("console.log", "onscroll");
-
+        if (isAfterRender)
+        {
+            Console.WriteLine("scroll");
+            await jsRuntime.InvokeAsync<string>("console.log", "onscroll");
+        }
         //var scrollHeight = (int)args.GetPropertyValue<Decimal>("target.scrollHeight");
         //var scrollTop = (int)args.GetPropertyValue<Decimal>("target.scrollTop");
         //var clientHeight = (int)args.GetPropertyValue<Decimal>("target.clientHeight");

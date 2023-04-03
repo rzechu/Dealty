@@ -28,4 +28,8 @@
     <ProjectReference Include="..\Dealty.Shared\Dealty.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Filters\" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,6 @@
-﻿using Dealty.WebApi.Interfaces;
+﻿using Dealty.Shared.Data;
+using Dealty.Shared.Filters;
+using Dealty.WebApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dealty.WebApi.Data
@@ -91,11 +93,13 @@ namespace Dealty.WebApi.Data
             }
         }
 
-        public async Task<IEnumerable<Promotion>> GetAllPaginatedAsync(int fetch, int offset)
+        public async Task<(IEnumerable<Promotion>, int)> GetAllPaginatedAsync(PaginationFilter paginationFilter)
         {
             try
             {
-                return await _dbContext.Promotions.Skip(offset).Take(fetch).ToListAsync();
+                int totalCount = await _dbContext.Promotions.CountAsync();
+                var dbRecords = await _dbContext.Promotions.Skip(paginationFilter.Offset).Take(paginationFilter.PageSize).ToListAsync();
+                return (dbRecords, totalCount);
             }
             catch (Exception ex)
             {

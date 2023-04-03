@@ -7,11 +7,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 string BASE_ADRESS = builder.Configuration.GetSection("webapiUrl")?.Value ?? throw new ArgumentNullException("webapiUrl");
-builder.Services.AddScoped(sp =>
+//builder.Services.AddScoped(sp =>
+//{
+//    var client = new HttpClient();
+//    client.BaseAddress = new Uri(BASE_ADRESS);
+//    return client;
+//});
+
+builder.Services.AddHttpClient("DealtyHttpClient", options =>
 {
-    var client = new HttpClient();
-    client.BaseAddress = new Uri(BASE_ADRESS);
-    return client;
+    options.BaseAddress = new Uri(BASE_ADRESS);
+    options.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
 // Add services to the container.
