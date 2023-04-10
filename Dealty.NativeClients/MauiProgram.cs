@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.WebView.Maui;
 using Dealty.NativeClients.Data;
 using Dealty.Shared.Services;
+using Dealty.Shared.Data;
 
 namespace Dealty.NativeClients;
 
@@ -24,6 +25,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<WeatherForecastService>();
         builder.Services.AddSingleton<IDataService, DataService>();
 
-		return builder.Build();
+        builder.Services.AddSingleton<PromotionStateContainer>();
+
+        return builder.Build();
 	}
 }

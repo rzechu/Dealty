@@ -1,0 +1,160 @@
+﻿@page "/promotions"
+@using Dealty.Shared
+@*@inject HttpClient http*@
+@inject NavigationManager navigationManager
+@inject Dealty.Shared.Data.PromotionStateContainer myStateContainer
+@implements IDisposable
+
+@inject IHttpClientFactory ClientFactory
+@inject IJSRuntime jsRuntime
+
+@using System.Net.Http.Json
+@using Microsoft.JSInterop;
+
+<h1>Promocje</h1>
+
+<div class="promocje" @onscroll="OnScroll">
+    @foreach (var promotion in promotions)
+    {
+@*        <div class="promocja">
+            <h3>@promotion.Title</h3>
+            <p>@promotion.Description</p>
+            <p>@promotion.InsertDate.ToString("yyyy-MM-dd HH:mm:ss")</p>
+        </div>*@
+        <div class="card w-25">
+            <div class="card-body">
+                <h5 class="card-title">@promotion.Title</h5>
+                <p class="card-text">@promotion.Description</p>
+                <blockquote class="card-text">$@promotion.Country</blockquote> <!-- price -->
+                <button class="btn btn-primary" @onclick="() => HandleButton(promotion.PromotionID)">Details</button>                
+            </div>
+        </div>
+
+    }
+
+    @if (loading)
+    {
+        <p>Loading...</p>
+    }
+</div>
+
+@if (error)
+{
+    <p class="error">@errorMessage</p>
+}
+
+<style>
+
+    div.promocje {
+        margin: 4px, 4px;
+        padding: 4px;
+        width: 500px;
+        height: 110px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        text-align: justify;
+    }
+</style>
+
+@code {
+    bool isAfterRender = false;
+    const int PAGE_SIZE = 3;
+
+    List<Data.Promotion> promotions = new List<Data.Promotion>();
+    private int page = 1;
+    private bool loading = false;
+    private bool endOfData = false;
+
+    private bool error = false;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (isAfterRender)
+        {
+            await jsRuntime.InvokeAsync<string>("console.log", "initizalied");
+        }
+        await LoadData();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        isAfterRender = true;
+
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+
+    private async Task LoadData()
+    {
+        try
+        {
+            if (loading || endOfData)
+                return;
+
+            if (isAfterRender)
+            {
+                Console.WriteLine("loading data");
+                await jsRuntime.InvokeAsync<string>("console.log", $"load data page={page}");
+            }
+
+            var http = ClientFactory.CreateClient("DealtyHttpClient");
+            loading = true;
+            var result = await http.GetFromJsonAsync<Data.ResponsePage<Data.Promotion>>($"{Dealty.Shared.Conts.POST_BASE_URL}Promotions/page?pageNumber={page}&pageSize={PAGE_SIZE}");
+            //var result = await http.GetFromJsonAsync<Data.ResponsePage<Data.Promotion>>($"promotions");
+
+            if(!result.HasNext || (!result.Data?.Any() ?? false))
+            {
+                endOfData = true;
+            }
+
+            promotions.AddRange(result.Data);
+            page++;
+
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error = true;
+            errorMessage = ex.Message;
+
+            loading = false;
+        }
+        finally
+        {
+            //loading = false;
+        }
+    }
+
+    private async Task OnScroll(/*UIEventArgs args*/)
+    {
+        if (isAfterRender)
+        {
+            Console.WriteLine("scroll");
+            await jsRuntime.InvokeAsync<string>("console.log", "onscroll");
+        }
+        //var scrollHeight = (int)args.GetPropertyValue<Decimal>("target.scrollHeight");
+        //var scrollTop = (int)args.GetPropertyValue<Decimal>("target.scrollTop");
+        //var clientHeight = (int)args.GetPropertyValue<Decimal>("target.clientHeight");
+
+        //if (scrollHeight - scrollTop == clientHeight)
+        {
+            await LoadData();
+        }
+    }
+
+        protected override void OnInitialized()
+        {
+            myStateContainer.OnStateChange += StateHasChanged;
+            //base.OnInitialized();
+        }
+        private void HandleButton(int promotionID)
+        {
+            myStateContainer.SetValue(promotions.Where(w=> w.PromotionID==promotionID).FirstOrDefault());
+            navigationManager.NavigateTo($"/promotion/{promotionID}");
+        }
+        public void Dispose()
+        {
+            myStateContainer.OnStateChange -= StateHasChanged;
+        }
+}

@@ -1,3 +1,4 @@
+using Dealty.Shared.Data;
 using Dealty.Shared.Services;
 using Dealty.Web.Data;
 using Microsoft.AspNetCore.Components;
@@ -25,6 +26,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<IDataService, DataService>();
+builder.Services.AddSingleton<PromotionStateContainer>();
+
 
 var app = builder.Build();
 

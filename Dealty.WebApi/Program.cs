@@ -4,6 +4,7 @@ using Dealty.WebApi.Controllers;
 using Dealty.WebApi.Interfaces;
 using Dealty.WebApi.Logger;
 using NLog.Web;
+using Dealty.Shared.Data;
 
 string CORS_POLICY = "CorsPolicy";
 
@@ -35,7 +36,6 @@ builder.Services.AddDbContext<DealtyDBContext>(
     options => {
         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), mysqlOptions => mysqlOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), null));
         });
-
 
 
 builder.Services.AddSingleton<IDealtyLogger, DealtyLogger>();
