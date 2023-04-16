@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Dealty.WebApi.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using Dealty.WebApi.Interfaces;
-using NLog;
-using NLog.Filters;
 using Dealty.Shared.Filters;
 using Dealty.Shared.Data;
 
@@ -62,6 +53,8 @@ namespace Dealty.WebApi.Controllers
 
         // GET: api/Promotions
         [HttpGet]
+        [AuthorizeDealty]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<IEnumerable<WebApi.Data.Promotion>>> GetPromotions()
         {
             var dbRecord = await _promotionRepositoryAsync.GetAllAsync();
@@ -89,6 +82,7 @@ namespace Dealty.WebApi.Controllers
         // PUT: api/Promotions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [AuthorizeDealty]
         public async Task<IActionResult> PutPromotion(int id, WebApi.Data.Promotion promotion)
         {
             if (id != promotion.PromotionID)
@@ -109,6 +103,7 @@ namespace Dealty.WebApi.Controllers
         // POST: api/Promotions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+               [AuthorizeDealty]
         public async Task<ActionResult<WebApi.Data.Promotion>> PostPromotion(WebApi.Data.Promotion promotion)
         {
             var dbRecord = await _promotionRepositoryAsync.AddAsync(promotion);
@@ -123,6 +118,7 @@ namespace Dealty.WebApi.Controllers
 
         // DELETE: api/Promotions/5
         [HttpDelete("{id}")]
+        [AuthorizeDealty]
         public async Task<IActionResult> DeletePromotion(int id)
         {
             var dbRecord = await _promotionRepositoryAsync.GetByIdAsync(id);
